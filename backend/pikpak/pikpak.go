@@ -1946,6 +1946,9 @@ func (o *Object) httpResponse(ctx context.Context, url, method string, options [
 	}
 	err = o.fs.pacer.Call(func() (bool, error) {
 		res, err = o.fs.client.Do(req)
+		if err == nil && (res.StatusCode < 200 || res.StatusCode > 299) {
+			err = errorHandler(res)
+		}
 		return o.fs.shouldRetry(ctx, res, err)
 	})
 	if err != nil {
