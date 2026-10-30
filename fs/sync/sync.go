@@ -994,7 +994,12 @@ func (s *syncCopyMove) copyDirMetadata(ctx context.Context, f fs.Fs, dst fs.Dire
 				newDst, err = operations.CopyDirMetadata(ctx, f, dst, dir, src)
 			}
 		} else if dst == nil && s.setDirModTime && s.copyEmptySrcDirs {
-			newDst, err = operations.MkdirModTime(ctx, f, dir, src.ModTime(ctx))
+			if s.setDirModTimeAfter {
+				err = operations.Mkdir(ctx, f, dir)
+				s.markDirModified(dir)
+			} else {
+				newDst, err = operations.MkdirModTime(ctx, f, dir, src.ModTime(ctx))
+			}
 		} else if dst == nil && s.copyEmptySrcDirs {
 			err = operations.Mkdir(ctx, f, dir)
 		} else if dst != nil && s.setDirModTime {
